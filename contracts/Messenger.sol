@@ -2,6 +2,7 @@ pragma solidity >=0.4.23 <0.6.0;
 
 contract Messenger {
     event Message(address _from, address _to, string _message);
+    event OpenChat(bytes32 identifier, address creator, address[] mates);
     mapping (address => mapping(address => bytes[3])) public publicKeys;
     mapping (bytes32 => MessageTool) public chat;
 
@@ -26,6 +27,7 @@ contract Messenger {
     function openChat(address[] memory mates, bytes memory base, bytes memory modulo) public returns (bytes32) {
         bytes32 hash = calculateIdentifier(abi.encodePacked(msg.sender), mates);
         chat[hash] = MessageTool(base, modulo);
+        emit OpenChat(hash, msg.sender, mates);
         return hash;
     }
 
