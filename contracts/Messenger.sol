@@ -4,13 +4,13 @@ contract Messenger {
     event Message(uint _chatId, uint _msgId, address _from, bytes _message);
     event JoinChat(uint _chatId, address _member);
     event Invitation(uint _chatId, address _member);
-    
+
     struct ChatInfo {
         bytes[] publicKeys;
         address[] users;
         mapping (address => bool) invitations;
     }
-    
+
     mapping(uint => ChatInfo) chats;
     uint public chatCounter;
 
@@ -18,7 +18,7 @@ contract Messenger {
         emit Message(chatId, msgId, msg.sender, message);
     }
 
-    function openChat(bytes memory publicKey, address[] memory initialMemmbers) public {
+    function openChat(bytes memory publicKey, address[] memory initialMemmbers) public returns (uint) {
         for (uint i = 0; i < initialMemmbers.length; i++) {
             chats[chatCounter].invitations[initialMemmbers[i]] = true;
             emit Invitation(chatCounter, initialMemmbers[i]);
@@ -26,8 +26,9 @@ contract Messenger {
         chats[chatCounter].invitations[msg.sender] = true;
         joinChat(chatCounter, publicKey);
         chatCounter += 1;
+        return chatCounter;
     }
-    
+
     function joinChat(uint chatId, bytes memory publicKey) public {
         require(chats[chatId].invitations[msg.sender]);
         chats[chatId].users.push(msg.sender);
