@@ -8,7 +8,8 @@ contract Messenger {
     struct ChatInfo {
         bytes32[] publicKeys;
         address[] users;
-        mapping (address => bool) invitations;
+        address[] invitations;
+        mapping (address => bool) invitationsMap;
     }
 
     mapping (uint => ChatInfo) chats;
@@ -18,24 +19,27 @@ contract Messenger {
         emit Message(chatId, msgId, msg.sender, message);
     }
 
-    function getChat(uint chatId) public view returns(bytes32[] memory, address[] memory) {
+    function getChat(uint chatId) public view returns(bytes32[] memory, address[] memory, address[] memory) {
         ChatInfo memory chatInfo = chats[chatId];
-        return (chatInfo.publicKeys, chatInfo.users);
+        return (chatInfo.publicKeys, chatInfo.users, chatInfo.invitations);
     }
 
     function openChat(bytes32 publicKey, address[] memory initialMemmbers) public returns (uint) {
+        uint chatId = chatCounter;
         for (uint i = 0; i < initialMemmbers.length; i++) {
-            chats[chatCounter].invitations[initialMemmbers[i]] = true;
-            emit Invitation(chatCounter, initialMemmbers[i]);
+            chats[chatId].invitationsMap[initialMemmbers[i]] = true;
+            chats[chatId].invitations.push(initialMemmbers[i]);
+            emit Invitation(chatId, initialMemmbers[i]);
         }
-        chats[chatCounter].invitations[msg.sender] = true;
-        joinChat(chatCounter, publicKey);
+        chats[chatId].invitationsMap[msg.sender] = true;
+        chats[chatId].invitations.push(msg.sender);
+        joinChat(chatId, publicKey);
         chatCounter += 1;
-        return chatCounter;
+        return chatId;
     }
 
     function joinChat(uint chatId, bytes32 publicKey) public {
-        require(chats[chatId].invitations[msg.sender]);
+        require(chats[chatId].invitationsMap[msg.sender]);
         chats[chatId].users.push(msg.sender);
         chats[chatId].publicKeys.push(publicKey);
         emit JoinChat(chatId, msg.sender);
