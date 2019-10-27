@@ -24,7 +24,7 @@ contract Messenger {
         return (chatInfo.publicKeys, chatInfo.users, chatInfo.invitations);
     }
 
-    function openChat(bytes32 publicKey, address[] memory initialMemmbers) public returns (uint) {
+    function openChat(bytes32 publicKeyPart1, bytes32 publicKeyPart2, address[] memory initialMemmbers) public returns (uint) {
         uint chatId = chatCounter;
         for (uint i = 0; i < initialMemmbers.length; i++) {
             chats[chatId].invitationsMap[initialMemmbers[i]] = true;
@@ -34,15 +34,16 @@ contract Messenger {
         chats[chatId].invitationsMap[msg.sender] = true;
         chats[chatId].invitations.push(msg.sender);
         emit Invitation(chatId, msg.sender);
-        joinChat(chatId, publicKey);
+        joinChat(chatId, publicKeyPart1, publicKeyPart2);
         chatCounter += 1;
         return chatId;
     }
 
-    function joinChat(uint chatId, bytes32 publicKey) public {
+    function joinChat(uint chatId, bytes32 publicKeyPart1, bytes32 publicKeyPart2) public {
         require(chats[chatId].invitationsMap[msg.sender], "You are not a member");
         chats[chatId].users.push(msg.sender);
-        chats[chatId].publicKeys.push(publicKey);
+        chats[chatId].publicKeys.push(publicKeyPart1);
+        chats[chatId].publicKeys.push(publicKeyPart2);
         emit JoinChat(chatId, msg.sender);
     }
 }
