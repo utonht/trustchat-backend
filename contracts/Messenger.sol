@@ -40,7 +40,7 @@ contract Messenger {
     }
 
     function joinChat(uint chatId, bytes32 publicKey) public {
-        require(chats[chatId].invitationsMap[msg.sender]);
+        require(chats[chatId].invitationsMap[msg.sender], "You are not a member");
         chats[chatId].users.push(msg.sender);
         chats[chatId].publicKeys.push(publicKey);
         emit JoinChat(chatId, msg.sender);
