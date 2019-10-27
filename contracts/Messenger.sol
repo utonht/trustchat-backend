@@ -33,6 +33,7 @@ contract Messenger {
         }
         chats[chatId].invitationsMap[msg.sender] = true;
         chats[chatId].invitations.push(msg.sender);
+        emit Invitation(chatId, msg.sender);
         joinChat(chatId, publicKey);
         chatCounter += 1;
         return chatId;
